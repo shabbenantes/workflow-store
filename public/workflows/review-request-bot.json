@@ -1,0 +1,12 @@
+{
+  "name": "Review Request Bot",
+  "nodes": [
+    {"parameters": {"rule": {"interval": [{"field": "days", "daysInterval": 1}]}}, "id": "schedule", "name": "Daily Check", "type": "n8n-nodes-base.scheduleTrigger", "typeVersion": 1, "position": [250, 300]},
+    {"parameters": {"operation": "read", "documentId": {"__rl": true, "value": "YOUR_SHEET_ID", "mode": "id"}, "sheetName": "Customers"}, "id": "get-customers", "name": "Get Customers", "type": "n8n-nodes-base.googleSheets", "typeVersion": 4, "position": [450, 300]},
+    {"parameters": {"conditions": {"number": [{"value1": "={{ $now.diff($json.purchase_date, 'days') }}", "operation": "gte", "value2": 7}], "boolean": [{"value1": "={{ $json.review_requested }}", "value2": false}]}}, "id": "filter", "name": "Filter Eligible", "type": "n8n-nodes-base.filter", "typeVersion": 1, "position": [650, 300]},
+    {"parameters": {"fromEmail": "support@yourbusiness.com", "toEmail": "={{ $json.email }}", "subject": "How was your experience with us?", "text": "Hi {{ $json.name }},\n\nWe hope you're enjoying your recent purchase!\n\nWould you mind taking 30 seconds to leave us a review? It helps other customers and means the world to us.\n\n[Leave a Review on Google](YOUR_GOOGLE_REVIEW_LINK)\n\nThank you!\nYour Business Team"}, "id": "send-email", "name": "Send Review Request", "type": "n8n-nodes-base.emailSend", "typeVersion": 2, "position": [850, 300]},
+    {"parameters": {"operation": "update", "documentId": {"__rl": true, "value": "YOUR_SHEET_ID", "mode": "id"}, "sheetName": "Customers", "columns": {"mappingMode": "defineBelow", "value": {"review_requested": true, "review_requested_at": "={{ $now.toISO() }}"}}}, "id": "update-sheet", "name": "Mark Requested", "type": "n8n-nodes-base.googleSheets", "typeVersion": 4, "position": [1050, 300]}
+  ],
+  "connections": {"Daily Check": {"main": [[{"node": "Get Customers", "type": "main", "index": 0}]]}, "Get Customers": {"main": [[{"node": "Filter Eligible", "type": "main", "index": 0}]]}, "Filter Eligible": {"main": [[{"node": "Send Review Request", "type": "main", "index": 0}]]}, "Send Review Request": {"main": [[{"node": "Mark Requested", "type": "main", "index": 0}]]}},
+  "settings": {"executionOrder": "v1"}
+}

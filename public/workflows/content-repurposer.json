@@ -1,0 +1,71 @@
+{
+  "name": "Content Repurposer",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "repurpose",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a content repurposing expert. Given the following blog post, create:\n1. 3 Twitter/X posts (under 280 chars each)\n2. 1 LinkedIn post (professional tone, 150-300 words)\n3. 1 Instagram caption (engaging, with emoji)\n4. 1 Email newsletter snippet (50-100 words)\n5. 3 key takeaways as bullet points\n\nFormat your response as JSON with keys: tweets, linkedin, instagram, email, takeaways\n\nBlog post:\n{{$json.content}}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "openai",
+      "name": "OpenAI - Repurpose",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "try {\n  const content = items[0].json.message?.content || items[0].json.text;\n  const parsed = JSON.parse(content);\n  return [{ json: parsed }];\n} catch (e) {\n  return [{ json: { error: 'Failed to parse', raw: items[0].json } }];\n}"
+      },
+      "id": "parse-json",
+      "name": "Parse JSON Response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "respond",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "OpenAI - Repurpose", "type": "main", "index": 0 }]]
+    },
+    "OpenAI - Repurpose": {
+      "main": [[{ "node": "Parse JSON Response", "type": "main", "index": 0 }]]
+    },
+    "Parse JSON Response": {
+      "main": [[{ "node": "Respond", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" }
+}
