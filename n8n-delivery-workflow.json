@@ -1,0 +1,112 @@
+{
+  "name": "Workflow Store - Auto Delivery",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "stripe-workflow-webhook",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "stripe-webhook",
+      "name": "Stripe Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.type }}",
+              "value2": "checkout.session.completed"
+            }
+          ]
+        }
+      },
+      "id": "check-event-type",
+      "name": "Is Checkout Complete?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const session = items[0].json.data.object;\nconst productName = session.line_items?.data?.[0]?.description || 'Workflow';\nconst customerEmail = session.customer_email || session.customer_details?.email;\nconst amount = session.amount_total / 100;\n\n// Map product names to workflow files\nconst workflowMap = {\n  'Lead Scraper Pro': 'lead-scraper-pro.json',\n  'Content Repurposer': 'content-repurposer.json',\n  'Social Auto-Poster': 'social-auto-poster.json',\n  'AI Blog Writer': 'ai-blog-writer.json',\n  'Review Request Bot': 'review-request-bot.json',\n  'Invoice Chaser': 'invoice-chaser.json'\n};\n\nconst workflowFile = workflowMap[productName] || 'lead-scraper-pro.json';\n\nreturn [{\n  json: {\n    email: customerEmail,\n    productName,\n    amount,\n    workflowFile,\n    downloadUrl: `https://workflow-store.onrender.com/workflows/${workflowFile}`\n  }\n}];"
+      },
+      "id": "parse-order",
+      "name": "Parse Order",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "shane@getapexautomation.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "Your {{ $json.productName }} Workflow is Ready! 🚀",
+        "html": "<h1>Thank you for your purchase!</h1><p>Hi there,</p><p>Your <strong>{{ $json.productName }}</strong> workflow is ready to download.</p><p><a href='{{ $json.downloadUrl }}' style='background: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;'>Download Your Workflow</a></p><h2>How to Use:</h2><ol><li>Download the JSON file above</li><li>Open n8n and go to Workflows</li><li>Click Import from File</li><li>Select the downloaded JSON</li><li>Add your API credentials</li><li>Activate and enjoy!</li></ol><p>Need help? Reply to this email and we'll assist you.</p><p>Happy automating!<br>The Apex Automation Team</p>"
+      },
+      "id": "send-delivery-email",
+      "name": "Send Delivery Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [850, 300],
+      "credentials": {
+        "smtp": {
+          "id": "zoho-smtp",
+          "name": "Zoho SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.pushover.net/1/messages.json",
+        "method": "POST",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "token", "value": "ant6jxshr6bg3scsu3h7u6pwxqsjb1" },
+            { "name": "user", "value": "uc5of4kmb2h9h71zxeew2pnwawabow" },
+            { "name": "title", "value": "💰 Workflow Sale!" },
+            { "name": "message", "value": "={{ $json.productName }} sold for ${{ $json.amount }} to {{ $json.email }}" }
+          ]
+        }
+      },
+      "id": "notify-shane",
+      "name": "Notify Shane",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"success\": true}"
+      },
+      "id": "respond",
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    }
+  ],
+  "connections": {
+    "Stripe Webhook": {
+      "main": [[{ "node": "Is Checkout Complete?", "type": "main", "index": 0 }]]
+    },
+    "Is Checkout Complete?": {
+      "main": [[{ "node": "Parse Order", "type": "main", "index": 0 }]]
+    },
+    "Parse Order": {
+      "main": [[{ "node": "Send Delivery Email", "type": "main", "index": 0 }]]
+    },
+    "Send Delivery Email": {
+      "main": [[{ "node": "Notify Shane", "type": "main", "index": 0 }]]
+    },
+    "Notify Shane": {
+      "main": [[{ "node": "Respond OK", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" }
+}
