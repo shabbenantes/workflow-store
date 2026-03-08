@@ -1,12 +1,219 @@
 {
   "name": "Invoice Chaser",
   "nodes": [
-    {"parameters": {"rule": {"interval": [{"field": "days", "daysInterval": 1}]}}, "id": "schedule", "name": "Daily Check", "type": "n8n-nodes-base.scheduleTrigger", "typeVersion": 1, "position": [250, 300]},
-    {"parameters": {"operation": "read", "documentId": {"__rl": true, "value": "YOUR_SHEET_ID", "mode": "id"}, "sheetName": "Invoices"}, "id": "get-invoices", "name": "Get Invoices", "type": "n8n-nodes-base.googleSheets", "typeVersion": 4, "position": [450, 300]},
-    {"parameters": {"conditions": {"string": [{"value1": "={{ $json.status }}", "value2": "unpaid"}], "number": [{"value1": "={{ $now.diff($json.due_date, 'days') }}", "operation": "gte", "value2": 0}]}}, "id": "filter-overdue", "name": "Filter Overdue", "type": "n8n-nodes-base.filter", "typeVersion": 1, "position": [650, 300]},
-    {"parameters": {"functionCode": "const daysPastDue = Math.floor((Date.now() - new Date(items[0].json.due_date)) / 86400000);\nlet tone = 'friendly';\nlet subject = 'Friendly reminder: Invoice #' + items[0].json.invoice_number;\nif (daysPastDue > 14) { tone = 'firm'; subject = 'Action required: Overdue invoice #' + items[0].json.invoice_number; }\nif (daysPastDue > 30) { tone = 'urgent'; subject = 'URGENT: Invoice #' + items[0].json.invoice_number + ' is significantly overdue'; }\nreturn [{ json: { ...items[0].json, daysPastDue, tone, subject } }];"}, "id": "determine-tone", "name": "Determine Tone", "type": "n8n-nodes-base.function", "typeVersion": 1, "position": [850, 300]},
-    {"parameters": {"fromEmail": "billing@yourbusiness.com", "toEmail": "={{ $json.client_email }}", "subject": "={{ $json.subject }}", "text": "Hi {{ $json.client_name }},\n\nThis is a {{ $json.tone }} reminder that invoice #{{ $json.invoice_number }} for ${{ $json.amount }} is now {{ $json.daysPastDue }} days past due.\n\nPlease process payment at your earliest convenience.\n\nPayment link: {{ $json.payment_link }}\n\nThank you,\nBilling Team"}, "id": "send-reminder", "name": "Send Reminder", "type": "n8n-nodes-base.emailSend", "typeVersion": 2, "position": [1050, 300]}
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "schedule-1",
+      "name": "Daily 9am (Weekdays)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.INVOICES_SHEET_ID }}"
+        },
+        "sheetName": "Invoices",
+        "options": {}
+      },
+      "id": "sheets-1",
+      "name": "Get Invoices",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const invoices = $input.all();\nconst now = new Date();\n\nconst overdue = invoices.filter(inv => {\n  const dueDate = new Date(inv.json.dueDate);\n  const daysPastDue = Math.floor((now - dueDate) / (1000 * 60 * 60 * 24));\n  return inv.json.status === 'unpaid' && daysPastDue > 0;\n}).map(inv => {\n  const dueDate = new Date(inv.json.dueDate);\n  const daysPastDue = Math.floor((now - dueDate) / (1000 * 60 * 60 * 24));\n  \n  // Determine reminder level\n  let reminderLevel = 'gentle';\n  if (daysPastDue > 30) reminderLevel = 'firm';\n  if (daysPastDue > 60) reminderLevel = 'final';\n  \n  return {\n    json: {\n      ...inv.json,\n      daysPastDue,\n      reminderLevel,\n      lastReminder: inv.json.lastReminder || null\n    }\n  };\n});\n\nreturn overdue;"
+      },
+      "id": "code-1",
+      "name": "Find Overdue",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ $json.daysPastDue }}",
+              "rightValue": "0",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ]
+        }
+      },
+      "id": "filter-1",
+      "name": "Has Overdue?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "model": "gpt-4o-mini",
+        "messages": {
+          "values": [
+            {
+              "content": "=Write a {{ $json.reminderLevel }} payment reminder email for:\n\nClient: {{ $json.clientName }}\nInvoice #: {{ $json.invoiceNumber }}\nAmount: ${{ $json.amount }}\nDays overdue: {{ $json.daysPastDue }}\nOriginal due date: {{ $json.dueDate }}\n\nTone guidelines:\n- gentle (1-30 days): Friendly reminder, assume they forgot\n- firm (31-60 days): Professional but concerned, mention impact\n- final (60+ days): Serious, mention next steps (collections, service pause)\n\nInclude:\n1. Subject line\n2. Email body\n3. Clear payment instructions\n4. Your business name placeholder: [YOUR BUSINESS]\n\nFormat as JSON: {\"subject\": \"...\", \"body\": \"...\"}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.5
+        }
+      },
+      "id": "openai-1",
+      "name": "Generate Reminder",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.3,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json.message.content;\nconst invoiceData = $('Has Overdue?').first().json;\n\nlet email;\ntry {\n  const jsonMatch = response.match(/```json\\n?([\\s\\S]*?)\\n?```/);\n  const jsonStr = jsonMatch ? jsonMatch[1] : response;\n  email = JSON.parse(jsonStr);\n} catch (e) {\n  email = { subject: 'Payment Reminder', body: response };\n}\n\nreturn [{\n  json: {\n    to: invoiceData.clientEmail,\n    subject: email.subject,\n    body: email.body,\n    invoiceNumber: invoiceData.invoiceNumber,\n    amount: invoiceData.amount,\n    daysPastDue: invoiceData.daysPastDue,\n    reminderLevel: invoiceData.reminderLevel\n  }\n}];"
+      },
+      "id": "code-2",
+      "name": "Format Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $env.SMTP_FROM }}",
+        "toEmail": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.body }}",
+        "options": {}
+      },
+      "id": "email-1",
+      "name": "Send Reminder",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [1450, 200]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.INVOICES_SHEET_ID }}"
+        },
+        "sheetName": "Invoices",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "lastReminder": "={{ $now.toISO() }}",
+            "reminderCount": "={{ ($json.reminderCount || 0) + 1 }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "sheets-2",
+      "name": "Update Invoice",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [1450, 400]
+    }
   ],
-  "connections": {"Daily Check": {"main": [[{"node": "Get Invoices", "type": "main", "index": 0}]]}, "Get Invoices": {"main": [[{"node": "Filter Overdue", "type": "main", "index": 0}]]}, "Filter Overdue": {"main": [[{"node": "Determine Tone", "type": "main", "index": 0}]]}, "Determine Tone": {"main": [[{"node": "Send Reminder", "type": "main", "index": 0}]]}},
-  "settings": {"executionOrder": "v1"}
+  "connections": {
+    "Daily 9am (Weekdays)": {
+      "main": [
+        [
+          {
+            "node": "Get Invoices",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Invoices": {
+      "main": [
+        [
+          {
+            "node": "Find Overdue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Overdue": {
+      "main": [
+        [
+          {
+            "node": "Has Overdue?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Overdue?": {
+      "main": [
+        [
+          {
+            "node": "Generate Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Reminder": {
+      "main": [
+        [
+          {
+            "node": "Format Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Email": {
+      "main": [
+        [
+          {
+            "node": "Send Reminder",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateId": "invoice-chaser"
+  }
 }

@@ -1,0 +1,205 @@
+{
+  "name": "Review Response Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "new-review",
+        "options": {}
+      },
+      "id": "webhook-1",
+      "name": "New Review Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "review-bot"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ $json.body.rating }}",
+              "rightValue": "3",
+              "operator": {
+                "type": "number",
+                "operation": "lte"
+              }
+            }
+          ]
+        }
+      },
+      "id": "if-1",
+      "name": "Check Rating",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "model": "gpt-4o-mini",
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a customer service expert. Write a professional, empathetic response to this negative review:\n\nReviewer: {{ $json.body.reviewerName }}\nRating: {{ $json.body.rating }}/5\nReview: {{ $json.body.reviewText }}\nBusiness: {{ $json.body.businessName }}\n\nGuidelines:\n1. Acknowledge their frustration\n2. Apologize sincerely (without admitting fault if unclear)\n3. Offer to make it right\n4. Provide contact info for follow-up\n5. Keep it under 150 words\n6. Don't be defensive\n\nWrite the response only, no explanations."
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.6
+        }
+      },
+      "id": "openai-negative",
+      "name": "Generate Negative Response",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.3,
+      "position": [650, 200]
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "model": "gpt-4o-mini",
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a friendly business owner. Write a warm, genuine thank-you response to this positive review:\n\nReviewer: {{ $json.body.reviewerName }}\nRating: {{ $json.body.rating }}/5\nReview: {{ $json.body.reviewText }}\nBusiness: {{ $json.body.businessName }}\n\nGuidelines:\n1. Thank them personally (use their name)\n2. Reference something specific they mentioned\n3. Express genuine appreciation\n4. Invite them back\n5. Keep it under 100 words\n6. Sound human, not corporate\n\nWrite the response only, no explanations."
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "openai-positive",
+      "name": "Generate Positive Response",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.3,
+      "position": [650, 400]
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch",
+        "output": "all"
+      },
+      "id": "merge-1",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.REVIEWS_SHEET_ID }}"
+        },
+        "sheetName": "Responses",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "reviewerName": "={{ $('New Review Webhook').first().json.body.reviewerName }}",
+            "rating": "={{ $('New Review Webhook').first().json.body.rating }}",
+            "originalReview": "={{ $('New Review Webhook').first().json.body.reviewText }}",
+            "generatedResponse": "={{ $json.message.content }}",
+            "timestamp": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "id": "sheets-1",
+      "name": "Log Response",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [1050, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"reviewerName\": \"{{ $('New Review Webhook').first().json.body.reviewerName }}\",\n  \"rating\": {{ $('New Review Webhook').first().json.body.rating }},\n  \"suggestedResponse\": {{ JSON.stringify($json.message.content) }},\n  \"sentiment\": \"{{ $('New Review Webhook').first().json.body.rating <= 3 ? 'negative' : 'positive' }}\"\n}",
+        "options": {}
+      },
+      "id": "respond-1",
+      "name": "Return Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1050, 400]
+    }
+  ],
+  "connections": {
+    "New Review Webhook": {
+      "main": [
+        [
+          {
+            "node": "Check Rating",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Rating": {
+      "main": [
+        [
+          {
+            "node": "Generate Negative Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Generate Positive Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Negative Response": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Positive Response": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Log Response",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Return Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateId": "review-response-bot"
+  }
+}
