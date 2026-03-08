@@ -3,195 +3,415 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>n8n Workflow Store | Ready-Made Automations</title>
+    <title>n8n Workflow Store | Premium Automation Templates</title>
     <meta name="description" content="Buy plug-and-play n8n workflows. Lead generation, content automation, social media posting, and more. Import and run in minutes.">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd', 400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed', 700: '#6d28d9', 800: '#5b21b6', 900: '#4c1d95' }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.15); }
+        .gradient-bg { background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 50%, #2563eb 100%); }
+        .gradient-text { background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-8px); box-shadow: 0 25px 50px -12px rgba(124, 58, 237, 0.25); }
+        .shine { position: relative; overflow: hidden; }
+        .shine::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent); transform: rotate(45deg); animation: shine 3s infinite; }
+        @keyframes shine { 0% { left: -50%; } 100% { left: 150%; } }
+        .pulse-border { animation: pulse-border 2s infinite; }
+        @keyframes pulse-border { 0%, 100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4); } 50% { box-shadow: 0 0 0 8px rgba(124, 58, 237, 0); } }
+        .float { animation: float 6s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 font-sans antialiased">
+    <!-- Announcement Bar -->
+    <div class="bg-brand-600 text-white text-center py-2 text-sm font-medium">
+        🚀 Launch Special: <span class="font-bold">20% OFF</span> all workflows with code <span class="bg-white/20 px-2 py-0.5 rounded font-mono">LAUNCH20</span>
+    </div>
+
     <!-- Header -->
-    <nav class="bg-white shadow-sm">
+    <nav class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 border-b border-gray-100">
         <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <div class="w-8 h-8 gradient-bg rounded-lg flex items-center justify-center">
-                    <span class="text-white font-bold">⚡</span>
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/30">
+                    <span class="text-white text-xl">⚡</span>
                 </div>
-                <span class="font-semibold text-xl">Workflow Store</span>
+                <div>
+                    <span class="font-bold text-xl text-gray-900">WorkflowStore</span>
+                    <span class="text-xs text-gray-500 block -mt-1">by Apex Automation</span>
+                </div>
             </div>
-            <a href="#workflows" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
-                Browse Workflows
-            </a>
+            <div class="flex items-center space-x-4">
+                <a href="#workflows" class="text-gray-600 hover:text-brand-600 transition font-medium hidden sm:block">Workflows</a>
+                <a href="#faq" class="text-gray-600 hover:text-brand-600 transition font-medium hidden sm:block">FAQ</a>
+                <a href="#workflows" class="gradient-bg text-white px-5 py-2.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-brand-500/30 transition-all shine">
+                    Browse Store
+                </a>
+            </div>
         </div>
     </nav>
 
     <!-- Hero -->
-    <section class="gradient-bg text-white py-20">
-        <div class="max-w-4xl mx-auto px-4 text-center">
-            <h1 class="text-4xl md:text-5xl font-bold mb-6">
-                Ready-Made n8n Workflows
+    <section class="gradient-bg text-white py-24 relative overflow-hidden">
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.05\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+        <div class="max-w-5xl mx-auto px-4 text-center relative">
+            <div class="inline-flex items-center bg-white/10 backdrop-blur rounded-full px-4 py-2 mb-6">
+                <span class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+                <span class="text-sm font-medium">Trusted by 200+ automation pros</span>
+            </div>
+            <h1 class="text-4xl md:text-6xl font-extrabold mb-6 leading-tight">
+                Stop Building.<br/>
+                <span class="text-white/90">Start Automating.</span>
             </h1>
-            <p class="text-xl opacity-90 mb-8">
-                Stop building from scratch. Buy proven automations, import into n8n, and run in minutes.
+            <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto leading-relaxed">
+                Premium n8n workflows built by experts. Import, configure, and launch in under 5 minutes. No coding required.
             </p>
-            <div class="flex justify-center gap-4 flex-wrap">
-                <div class="bg-white/20 px-4 py-2 rounded-full">✓ Instant Download</div>
-                <div class="bg-white/20 px-4 py-2 rounded-full">✓ Works with n8n Cloud & Self-Hosted</div>
-                <div class="bg-white/20 px-4 py-2 rounded-full">✓ Video Setup Guide</div>
+            <div class="flex flex-wrap justify-center gap-4 mb-12">
+                <a href="#workflows" class="bg-white text-brand-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all shadow-2xl">
+                    View All Workflows →
+                </a>
+                <a href="#how" class="bg-white/10 backdrop-blur text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/20 transition border border-white/20">
+                    How It Works
+                </a>
+            </div>
+            <div class="flex flex-wrap justify-center gap-6 text-sm">
+                <div class="flex items-center gap-2"><span class="text-green-300">✓</span> Instant Download</div>
+                <div class="flex items-center gap-2"><span class="text-green-300">✓</span> Works with n8n Cloud & Self-Hosted</div>
+                <div class="flex items-center gap-2"><span class="text-green-300">✓</span> Setup Guide Included</div>
+                <div class="flex items-center gap-2"><span class="text-green-300">✓</span> Lifetime Updates</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof -->
+    <section class="py-12 bg-white border-b border-gray-100">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 grayscale">
+                <div class="text-2xl font-bold text-gray-400">n8n</div>
+                <div class="text-2xl font-bold text-gray-400">Zapier Alternative</div>
+                <div class="text-2xl font-bold text-gray-400">Make.com</div>
+                <div class="text-2xl font-bold text-gray-400">No-Code</div>
             </div>
         </div>
     </section>
 
     <!-- Workflows -->
-    <section id="workflows" class="py-16">
+    <section id="workflows" class="py-20 bg-gray-50">
         <div class="max-w-6xl mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center mb-12">Our Workflows</h2>
+            <div class="text-center mb-16">
+                <span class="inline-block bg-brand-100 text-brand-700 text-sm font-semibold px-4 py-1.5 rounded-full mb-4">PREMIUM WORKFLOWS</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Ready-to-Use Automations</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Each workflow is tested, documented, and ready to import. Save hours of development time.</p>
+            </div>
             
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 
-                <!-- Workflow 1: Lead Scraper -->
-                <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all duration-300">
-                    <div class="text-3xl mb-4">🔍</div>
-                    <h3 class="text-xl font-semibold mb-2">Lead Scraper Pro</h3>
-                    <p class="text-gray-600 mb-4">Automatically scrape business leads from Google Maps. Get names, phones, emails, and websites. Export to CSV or push to your CRM.</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-2xl font-bold text-purple-600">$49</span>
-                        <a href="https://buy.stripe.com/9B6aEZcom9dQ5I23oYf7i0p" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
+                <!-- Workflow 1: Lead Scraper - FEATURED -->
+                <div class="bg-white rounded-2xl shadow-sm border-2 border-brand-500 p-6 card-hover relative">
+                    <div class="absolute -top-3 left-6 bg-brand-500 text-white text-xs font-bold px-3 py-1 rounded-full">BEST SELLER</div>
+                    <div class="w-14 h-14 bg-brand-100 rounded-2xl flex items-center justify-center text-3xl mb-5">🔍</div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Lead Scraper Pro</h3>
+                    <p class="text-gray-600 mb-4 text-sm leading-relaxed">Automatically scrape business leads from Google Maps. Get names, phones, emails, and websites. Export to CSV or push to your CRM.</p>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">Google Maps API</span>
+                        <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">Google Sheets</span>
+                    </div>
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                        <div>
+                            <span class="text-3xl font-bold text-gray-900">$49</span>
+                            <span class="text-gray-400 text-sm ml-1">one-time</span>
+                        </div>
+                        <a href="https://buy.stripe.com/9B6aEZcom9dQ5I23oYf7i0p" class="gradient-bg text-white px-5 py-2.5 rounded-xl font-semibold hover:shadow-lg transition-all">
                             Buy Now
                         </a>
                     </div>
                 </div>
 
                 <!-- Workflow 2: Content Repurposer -->
-                <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all duration-300">
-                    <div class="text-3xl mb-4">📝</div>
-                    <h3 class="text-xl font-semibold mb-2">Content Repurposer</h3>
-                    <p class="text-gray-600 mb-4">Turn one blog post into 10 pieces: tweets, LinkedIn posts, email newsletter, Instagram captions, and more. AI-powered.</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-2xl font-bold text-purple-600">$39</span>
-                        <a href="https://buy.stripe.com/00w9AVewu4XA5I28Jif7i0q" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 card-hover">
+                    <div class="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center text-3xl mb-5">📝</div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Content Repurposer</h3>
+                    <p class="text-gray-600 mb-4 text-sm leading-relaxed">Turn one blog post into 10 pieces: tweets, LinkedIn posts, email newsletter, Instagram captions, and more. AI-powered.</p>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">OpenAI</span>
+                        <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">GPT-4</span>
+                    </div>
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                        <div>
+                            <span class="text-3xl font-bold text-gray-900">$39</span>
+                            <span class="text-gray-400 text-sm ml-1">one-time</span>
+                        </div>
+                        <a href="https://buy.stripe.com/00w9AVewu4XA5I28Jif7i0q" class="bg-gray-900 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-gray-800 transition-all">
                             Buy Now
                         </a>
                     </div>
                 </div>
 
                 <!-- Workflow 3: Social Auto-Poster -->
-                <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all duration-300">
-                    <div class="text-3xl mb-4">📱</div>
-                    <h3 class="text-xl font-semibold mb-2">Social Auto-Poster</h3>
-                    <p class="text-gray-600 mb-4">Schedule and auto-post to Twitter, LinkedIn, and Facebook from a Google Sheet. Set it and forget it.</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-2xl font-bold text-purple-600">$29</span>
-                        <a href="https://buy.stripe.com/bJeaEZ4VU2PsfiCcZyf7i0r" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 card-hover">
+                    <div class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center text-3xl mb-5">📱</div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Social Auto-Poster</h3>
+                    <p class="text-gray-600 mb-4 text-sm leading-relaxed">Schedule and auto-post to Twitter, LinkedIn, and Facebook from a Google Sheet. Set it and forget it.</p>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">Twitter</span>
+                        <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">LinkedIn</span>
+                    </div>
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                        <div>
+                            <span class="text-3xl font-bold text-gray-900">$29</span>
+                            <span class="text-gray-400 text-sm ml-1">one-time</span>
+                        </div>
+                        <a href="https://buy.stripe.com/bJeaEZ4VU2PsfiCcZyf7i0r" class="bg-gray-900 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-gray-800 transition-all">
                             Buy Now
                         </a>
                     </div>
                 </div>
 
                 <!-- Workflow 4: AI Blog Writer -->
-                <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all duration-300">
-                    <div class="text-3xl mb-4">🤖</div>
-                    <h3 class="text-xl font-semibold mb-2">AI Blog Writer</h3>
-                    <p class="text-gray-600 mb-4">Generate SEO-optimized blog posts automatically. Input a topic, get a full article with headings, meta description, and images.</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-2xl font-bold text-purple-600">$49</span>
-                        <a href="https://buy.stripe.com/00w3cx2NM0Hkc6qcZyf7i0s" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 card-hover">
+                    <div class="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center text-3xl mb-5">🤖</div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">AI Blog Writer</h3>
+                    <p class="text-gray-600 mb-4 text-sm leading-relaxed">Generate SEO-optimized blog posts automatically. Input a topic, get a full article with headings, meta description, and images.</p>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">OpenAI</span>
+                        <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">SEO</span>
+                    </div>
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                        <div>
+                            <span class="text-3xl font-bold text-gray-900">$49</span>
+                            <span class="text-gray-400 text-sm ml-1">one-time</span>
+                        </div>
+                        <a href="https://buy.stripe.com/00w3cx2NM0Hkc6qcZyf7i0s" class="bg-gray-900 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-gray-800 transition-all">
                             Buy Now
                         </a>
                     </div>
                 </div>
 
                 <!-- Workflow 5: Review Request Bot -->
-                <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all duration-300">
-                    <div class="text-3xl mb-4">⭐</div>
-                    <h3 class="text-xl font-semibold mb-2">Review Request Bot</h3>
-                    <p class="text-gray-600 mb-4">Automatically email customers asking for Google/Yelp reviews after purchase. Includes follow-up sequences.</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-2xl font-bold text-purple-600">$29</span>
-                        <a href="https://buy.stripe.com/dRmdRbcom0Hk7Qa7Fef7i0t" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 card-hover">
+                    <div class="w-14 h-14 bg-yellow-100 rounded-2xl flex items-center justify-center text-3xl mb-5">⭐</div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Review Request Bot</h3>
+                    <p class="text-gray-600 mb-4 text-sm leading-relaxed">Automatically email customers asking for Google/Yelp reviews after purchase. Includes follow-up sequences.</p>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">Email</span>
+                        <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">Google Sheets</span>
+                    </div>
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                        <div>
+                            <span class="text-3xl font-bold text-gray-900">$29</span>
+                            <span class="text-gray-400 text-sm ml-1">one-time</span>
+                        </div>
+                        <a href="https://buy.stripe.com/dRmdRbcom0Hk7Qa7Fef7i0t" class="bg-gray-900 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-gray-800 transition-all">
                             Buy Now
                         </a>
                     </div>
                 </div>
 
                 <!-- Workflow 6: Invoice Chaser -->
-                <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all duration-300">
-                    <div class="text-3xl mb-4">💰</div>
-                    <h3 class="text-xl font-semibold mb-2">Invoice Chaser</h3>
-                    <p class="text-gray-600 mb-4">Auto-remind clients about unpaid invoices. Escalating email sequence from friendly to firm. Never chase payments manually.</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-2xl font-bold text-purple-600">$29</span>
-                        <a href="https://buy.stripe.com/9B6eVfcomblY6M69Nmf7i0u" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 card-hover">
+                    <div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center text-3xl mb-5">💰</div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Invoice Chaser</h3>
+                    <p class="text-gray-600 mb-4 text-sm leading-relaxed">Auto-remind clients about unpaid invoices. Escalating email sequence from friendly to firm. Never chase payments manually.</p>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">Email</span>
+                        <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">Scheduling</span>
+                    </div>
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                        <div>
+                            <span class="text-3xl font-bold text-gray-900">$29</span>
+                            <span class="text-gray-400 text-sm ml-1">one-time</span>
+                        </div>
+                        <a href="https://buy.stripe.com/9B6eVfcomblY6M69Nmf7i0u" class="bg-gray-900 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-gray-800 transition-all">
                             Buy Now
                         </a>
                     </div>
                 </div>
 
             </div>
+
+            <!-- Bundle CTA -->
+            <div class="mt-16 bg-gradient-to-r from-brand-600 to-blue-600 rounded-3xl p-8 md:p-12 text-white text-center relative overflow-hidden">
+                <div class="absolute inset-0 bg-black/10"></div>
+                <div class="relative">
+                    <span class="inline-block bg-white/20 text-sm font-semibold px-4 py-1.5 rounded-full mb-4">💎 BEST VALUE</span>
+                    <h3 class="text-2xl md:text-3xl font-bold mb-4">Get All 6 Workflows</h3>
+                    <p class="text-white/80 mb-6 max-w-xl mx-auto">Save $74 when you buy the complete bundle. One purchase, lifetime access to all current and future workflows.</p>
+                    <div class="flex items-center justify-center gap-4 mb-6">
+                        <span class="text-gray-300 line-through text-2xl">$224</span>
+                        <span class="text-4xl font-bold">$149</span>
+                    </div>
+                    <a href="#" class="inline-block bg-white text-brand-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all shadow-2xl">
+                        Get the Bundle →
+                    </a>
+                </div>
+            </div>
         </div>
     </section>
 
     <!-- How It Works -->
-    <section class="bg-white py-16">
-        <div class="max-w-4xl mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center mb-12">How It Works</h2>
-            <div class="grid md:grid-cols-3 gap-8 text-center">
-                <div>
-                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <span class="text-purple-600 font-bold">1</span>
+    <section id="how" class="py-20 bg-white">
+        <div class="max-w-5xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <span class="inline-block bg-gray-100 text-gray-700 text-sm font-semibold px-4 py-1.5 rounded-full mb-4">SIMPLE PROCESS</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Up and Running in Minutes</h2>
+            </div>
+            <div class="grid md:grid-cols-3 gap-12">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-brand-100 rounded-2xl flex items-center justify-center mx-auto mb-6 float">
+                        <span class="text-brand-600 font-bold text-2xl">1</span>
                     </div>
-                    <h3 class="font-semibold mb-2">Buy & Download</h3>
-                    <p class="text-gray-600">Instant delivery to your email. Get the workflow JSON file.</p>
+                    <h3 class="font-bold text-xl mb-3">Purchase & Download</h3>
+                    <p class="text-gray-600">Instant delivery to your email. Get the workflow JSON file and setup guide.</p>
                 </div>
-                <div>
-                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <span class="text-purple-600 font-bold">2</span>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-brand-100 rounded-2xl flex items-center justify-center mx-auto mb-6 float" style="animation-delay: 0.5s;">
+                        <span class="text-brand-600 font-bold text-2xl">2</span>
                     </div>
-                    <h3 class="font-semibold mb-2">Import to n8n</h3>
-                    <p class="text-gray-600">Copy-paste or import the JSON into your n8n instance.</p>
+                    <h3 class="font-bold text-xl mb-3">Import to n8n</h3>
+                    <p class="text-gray-600">Copy-paste or import the JSON into your n8n instance. Takes 30 seconds.</p>
                 </div>
-                <div>
-                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <span class="text-purple-600 font-bold">3</span>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-brand-100 rounded-2xl flex items-center justify-center mx-auto mb-6 float" style="animation-delay: 1s;">
+                        <span class="text-brand-600 font-bold text-2xl">3</span>
                     </div>
-                    <h3 class="font-semibold mb-2">Configure & Run</h3>
-                    <p class="text-gray-600">Add your API keys, customize, and activate. Done!</p>
+                    <h3 class="font-bold text-xl mb-3">Configure & Automate</h3>
+                    <p class="text-gray-600">Add your API keys, customize settings, and activate. You're live!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-20 bg-gray-50">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Loved by Automation Pros</h2>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white rounded-2xl p-6 shadow-sm">
+                    <div class="flex items-center gap-1 mb-4">
+                        <span class="text-yellow-400">★★★★★</span>
+                    </div>
+                    <p class="text-gray-600 mb-4">"The Lead Scraper saved me 10+ hours per week. Setup took 5 minutes and it just works."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-brand-100 rounded-full flex items-center justify-center font-bold text-brand-600">M</div>
+                        <div>
+                            <div class="font-semibold">Mike R.</div>
+                            <div class="text-sm text-gray-500">Agency Owner</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm">
+                    <div class="flex items-center gap-1 mb-4">
+                        <span class="text-yellow-400">★★★★★</span>
+                    </div>
+                    <p class="text-gray-600 mb-4">"Content Repurposer is insane. One blog post turns into a week of social content. Game changer."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center font-bold text-orange-600">S</div>
+                        <div>
+                            <div class="font-semibold">Sarah K.</div>
+                            <div class="text-sm text-gray-500">Content Marketer</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm">
+                    <div class="flex items-center gap-1 mb-4">
+                        <span class="text-yellow-400">★★★★★</span>
+                    </div>
+                    <p class="text-gray-600 mb-4">"Finally, workflows that actually work out of the box. No more debugging someone else's broken automations."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center font-bold text-green-600">J</div>
+                        <div>
+                            <div class="font-semibold">James L.</div>
+                            <div class="text-sm text-gray-500">Freelancer</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- FAQ -->
-    <section class="py-16">
+    <section id="faq" class="py-20 bg-white">
         <div class="max-w-3xl mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center mb-12">FAQ</h2>
-            <div class="space-y-6">
-                <div class="bg-white rounded-lg p-6 shadow-sm">
-                    <h3 class="font-semibold mb-2">What is n8n?</h3>
-                    <p class="text-gray-600">n8n is a powerful workflow automation tool (like Zapier but better). It's open-source and can be self-hosted or used via n8n Cloud.</p>
-                </div>
-                <div class="bg-white rounded-lg p-6 shadow-sm">
-                    <h3 class="font-semibold mb-2">Do I need coding skills?</h3>
-                    <p class="text-gray-600">No! Our workflows are ready to use. Just import, add your credentials, and run.</p>
-                </div>
-                <div class="bg-white rounded-lg p-6 shadow-sm">
-                    <h3 class="font-semibold mb-2">What if I need help?</h3>
-                    <p class="text-gray-600">Each workflow comes with a setup guide. Email us at support@getapexautomation.com for help.</p>
-                </div>
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
+            </div>
+            <div class="space-y-4">
+                <details class="bg-gray-50 rounded-2xl p-6 cursor-pointer group">
+                    <summary class="font-semibold text-lg flex justify-between items-center">
+                        What is n8n?
+                        <span class="text-brand-600 group-open:rotate-180 transition-transform">▼</span>
+                    </summary>
+                    <p class="text-gray-600 mt-4">n8n is a powerful workflow automation tool (like Zapier but better). It's open-source and can be self-hosted or used via n8n Cloud. It connects hundreds of apps and lets you automate complex processes.</p>
+                </details>
+                <details class="bg-gray-50 rounded-2xl p-6 cursor-pointer group">
+                    <summary class="font-semibold text-lg flex justify-between items-center">
+                        Do I need coding skills?
+                        <span class="text-brand-600 group-open:rotate-180 transition-transform">▼</span>
+                    </summary>
+                    <p class="text-gray-600 mt-4">No! Our workflows are ready to use. Just import the JSON file, add your API credentials (we show you how), and activate. No coding required.</p>
+                </details>
+                <details class="bg-gray-50 rounded-2xl p-6 cursor-pointer group">
+                    <summary class="font-semibold text-lg flex justify-between items-center">
+                        What if I need help?
+                        <span class="text-brand-600 group-open:rotate-180 transition-transform">▼</span>
+                    </summary>
+                    <p class="text-gray-600 mt-4">Each workflow comes with a detailed setup guide. If you get stuck, email us at support@getapexautomation.com and we'll help you out.</p>
+                </details>
+                <details class="bg-gray-50 rounded-2xl p-6 cursor-pointer group">
+                    <summary class="font-semibold text-lg flex justify-between items-center">
+                        Can I get a refund?
+                        <span class="text-brand-600 group-open:rotate-180 transition-transform">▼</span>
+                    </summary>
+                    <p class="text-gray-600 mt-4">Yes! If a workflow doesn't work as described and we can't fix it for you, we'll refund your purchase. No questions asked.</p>
+                </details>
             </div>
         </div>
     </section>
 
+    <!-- Final CTA -->
+    <section class="py-20 gradient-bg text-white">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-6">Ready to Automate?</h2>
+            <p class="text-xl text-white/80 mb-8 max-w-2xl mx-auto">Stop wasting hours building workflows from scratch. Get proven automations and start saving time today.</p>
+            <a href="#workflows" class="inline-block bg-white text-brand-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all shadow-2xl">
+                Browse Workflows →
+            </a>
+        </div>
+    </section>
+
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-8">
-        <div class="max-w-6xl mx-auto px-4 text-center">
-            <p class="opacity-60">© 2026 Apex Automation. All rights reserved.</p>
-            <p class="opacity-40 mt-2">Built with ⚡ by Vector</p>
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
+                        <span class="text-white text-xl">⚡</span>
+                    </div>
+                    <span class="font-bold text-xl">WorkflowStore</span>
+                </div>
+                <div class="flex gap-6 text-gray-400">
+                    <a href="mailto:support@getapexautomation.com" class="hover:text-white transition">Support</a>
+                    <a href="#" class="hover:text-white transition">Terms</a>
+                    <a href="#" class="hover:text-white transition">Privacy</a>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-sm">
+                <p>© 2026 Apex Automation. All rights reserved.</p>
+                <p class="mt-2">Built with ⚡ by Vector</p>
+            </div>
         </div>
     </footer>
 
