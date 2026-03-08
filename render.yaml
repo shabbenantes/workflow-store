@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: workflow-store
+    env: static
+    buildCommand: echo "Static site"
+    staticPublishPath: .
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=3600

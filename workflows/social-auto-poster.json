@@ -1,0 +1,93 @@
+{
+  "name": "Social Auto-Poster",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "hours", "hoursInterval": 6 }] }
+      },
+      "id": "schedule",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": { "__rl": true, "value": "YOUR_GOOGLE_SHEET_ID", "mode": "id" },
+        "sheetName": "Posts",
+        "options": { "range": "A:E" }
+      },
+      "id": "get-posts",
+      "name": "Get Posts from Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [{ "value1": "={{ $json.posted }}", "value2": false }]
+        }
+      },
+      "id": "filter-unposted",
+      "name": "Filter Unposted",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": { "amount": 1 },
+      "id": "limit-one",
+      "name": "Get First Post",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.content }}",
+        "additionalFields": {}
+      },
+      "id": "post-twitter",
+      "name": "Post to Twitter",
+      "type": "n8n-nodes-base.twitter",
+      "typeVersion": 2,
+      "position": [1050, 200]
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.content }}",
+        "additionalFields": {}
+      },
+      "id": "post-linkedin",
+      "name": "Post to LinkedIn",
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [1050, 400]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "YOUR_GOOGLE_SHEET_ID", "mode": "id" },
+        "sheetName": "Posts",
+        "columns": { "mappingMode": "defineBelow", "value": { "posted": true, "posted_at": "={{ $now.toISO() }}" } },
+        "options": {}
+      },
+      "id": "mark-posted",
+      "name": "Mark as Posted",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [1250, 300]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": { "main": [[{ "node": "Get Posts from Sheet", "type": "main", "index": 0 }]] },
+    "Get Posts from Sheet": { "main": [[{ "node": "Filter Unposted", "type": "main", "index": 0 }]] },
+    "Filter Unposted": { "main": [[{ "node": "Get First Post", "type": "main", "index": 0 }]] },
+    "Get First Post": { "main": [[{ "node": "Post to Twitter", "type": "main", "index": 0 }, { "node": "Post to LinkedIn", "type": "main", "index": 0 }]] },
+    "Post to Twitter": { "main": [[{ "node": "Mark as Posted", "type": "main", "index": 0 }]] },
+    "Post to LinkedIn": { "main": [[{ "node": "Mark as Posted", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }
+}

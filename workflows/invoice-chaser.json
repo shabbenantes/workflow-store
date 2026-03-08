@@ -1,0 +1,12 @@
+{
+  "name": "Invoice Chaser",
+  "nodes": [
+    {"parameters": {"rule": {"interval": [{"field": "days", "daysInterval": 1}]}}, "id": "schedule", "name": "Daily Check", "type": "n8n-nodes-base.scheduleTrigger", "typeVersion": 1, "position": [250, 300]},
+    {"parameters": {"operation": "read", "documentId": {"__rl": true, "value": "YOUR_SHEET_ID", "mode": "id"}, "sheetName": "Invoices"}, "id": "get-invoices", "name": "Get Invoices", "type": "n8n-nodes-base.googleSheets", "typeVersion": 4, "position": [450, 300]},
+    {"parameters": {"conditions": {"string": [{"value1": "={{ $json.status }}", "value2": "unpaid"}], "number": [{"value1": "={{ $now.diff($json.due_date, 'days') }}", "operation": "gte", "value2": 0}]}}, "id": "filter-overdue", "name": "Filter Overdue", "type": "n8n-nodes-base.filter", "typeVersion": 1, "position": [650, 300]},
+    {"parameters": {"functionCode": "const daysPastDue = Math.floor((Date.now() - new Date(items[0].json.due_date)) / 86400000);\nlet tone = 'friendly';\nlet subject = 'Friendly reminder: Invoice #' + items[0].json.invoice_number;\nif (daysPastDue > 14) { tone = 'firm'; subject = 'Action required: Overdue invoice #' + items[0].json.invoice_number; }\nif (daysPastDue > 30) { tone = 'urgent'; subject = 'URGENT: Invoice #' + items[0].json.invoice_number + ' is significantly overdue'; }\nreturn [{ json: { ...items[0].json, daysPastDue, tone, subject } }];"}, "id": "determine-tone", "name": "Determine Tone", "type": "n8n-nodes-base.function", "typeVersion": 1, "position": [850, 300]},
+    {"parameters": {"fromEmail": "billing@yourbusiness.com", "toEmail": "={{ $json.client_email }}", "subject": "={{ $json.subject }}", "text": "Hi {{ $json.client_name }},\n\nThis is a {{ $json.tone }} reminder that invoice #{{ $json.invoice_number }} for ${{ $json.amount }} is now {{ $json.daysPastDue }} days past due.\n\nPlease process payment at your earliest convenience.\n\nPayment link: {{ $json.payment_link }}\n\nThank you,\nBilling Team"}, "id": "send-reminder", "name": "Send Reminder", "type": "n8n-nodes-base.emailSend", "typeVersion": 2, "position": [1050, 300]}
+  ],
+  "connections": {"Daily Check": {"main": [[{"node": "Get Invoices", "type": "main", "index": 0}]]}, "Get Invoices": {"main": [[{"node": "Filter Overdue", "type": "main", "index": 0}]]}, "Filter Overdue": {"main": [[{"node": "Determine Tone", "type": "main", "index": 0}]]}, "Determine Tone": {"main": [[{"node": "Send Reminder", "type": "main", "index": 0}]]}},
+  "settings": {"executionOrder": "v1"}
+}

@@ -1,0 +1,10 @@
+{
+  "name": "AI Blog Writer",
+  "nodes": [
+    {"parameters": {"httpMethod": "POST", "path": "generate-blog", "responseMode": "responseNode"}, "id": "webhook", "name": "Webhook", "type": "n8n-nodes-base.webhook", "typeVersion": 1, "position": [250, 300]},
+    {"parameters": {"model": "gpt-4", "messages": {"values": [{"content": "=Write a comprehensive, SEO-optimized blog post about: {{$json.topic}}\n\nInclude:\n- Engaging title with power words\n- Meta description (155 chars)\n- Introduction hook\n- 3-5 H2 sections with detailed content\n- Bullet points and numbered lists where appropriate\n- Conclusion with CTA\n- 3 related keywords\n\nFormat as JSON with keys: title, metaDescription, content (as HTML), keywords"}]}, "options": {"temperature": 0.7, "maxTokens": 2000}}, "id": "openai", "name": "Generate Blog", "type": "@n8n/n8n-nodes-langchain.openAi", "typeVersion": 1, "position": [450, 300]},
+    {"parameters": {"respondWith": "json", "responseBody": "={{ JSON.parse($json.message.content) }}"}, "id": "respond", "name": "Respond", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [650, 300]}
+  ],
+  "connections": {"Webhook": {"main": [[{"node": "Generate Blog", "type": "main", "index": 0}]]}, "Generate Blog": {"main": [[{"node": "Respond", "type": "main", "index": 0}]]}},
+  "settings": {"executionOrder": "v1"}
+}

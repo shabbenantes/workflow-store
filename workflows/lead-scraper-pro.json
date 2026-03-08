@@ -1,0 +1,111 @@
+{
+  "name": "Lead Scraper Pro",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "scrape-leads",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://maps.googleapis.com/maps/api/place/textsearch/json?query={{$json.query}}&key={{$env.GOOGLE_MAPS_API_KEY}}",
+        "options": {}
+      },
+      "id": "google-places-search",
+      "name": "Google Places Search",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const results = items[0].json.results || [];\nreturn results.map(place => ({\n  json: {\n    name: place.name,\n    address: place.formatted_address,\n    rating: place.rating,\n    user_ratings_total: place.user_ratings_total,\n    place_id: place.place_id,\n    types: place.types?.join(', ')\n  }\n}));"
+      },
+      "id": "parse-results",
+      "name": "Parse Results",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://maps.googleapis.com/maps/api/place/details/json?place_id={{$json.place_id}}&fields=name,formatted_address,formatted_phone_number,website,opening_hours&key={{$env.GOOGLE_MAPS_API_KEY}}",
+        "options": {}
+      },
+      "id": "get-place-details",
+      "name": "Get Place Details",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const result = items[0].json.result || {};\nreturn [{\n  json: {\n    name: result.name,\n    address: result.formatted_address,\n    phone: result.formatted_phone_number,\n    website: result.website,\n    is_open: result.opening_hours?.open_now\n  }\n}];"
+      },
+      "id": "format-output",
+      "name": "Format Output",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "value": "YOUR_GOOGLE_SHEET_ID", "mode": "id" },
+        "sheetName": "Leads",
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {}
+        },
+        "options": {}
+      },
+      "id": "save-to-sheet",
+      "name": "Save to Google Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1450, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [[{ "node": "Google Places Search", "type": "main", "index": 0 }]]
+    },
+    "Google Places Search": {
+      "main": [[{ "node": "Parse Results", "type": "main", "index": 0 }]]
+    },
+    "Parse Results": {
+      "main": [[{ "node": "Get Place Details", "type": "main", "index": 0 }]]
+    },
+    "Get Place Details": {
+      "main": [[{ "node": "Format Output", "type": "main", "index": 0 }]]
+    },
+    "Format Output": {
+      "main": [[{ "node": "Save to Google Sheet", "type": "main", "index": 0 }]]
+    },
+    "Save to Google Sheet": {
+      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
